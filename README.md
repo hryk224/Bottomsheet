@@ -2,7 +2,7 @@
 
 Component which presents a dismissible view from the bottom of the screen
 
-[![Cocoapods Compatible](http://img.shields.io/cocoapods/v/PCLBlurEffectAlert.svg?style=flat)](http://cocoadocs.org/docsets/PCLBlurEffectAlert)
+[![Cocoapods Compatible](http://img.shields.io/cocoapods/v/Bottomsheet.svg?style=flat)](http://cocoadocs.org/docsets/Bottomsheet)
 [![Swift 2.0](https://img.shields.io/badge/Swift-2.0-orange.svg?style=flat)](https://developer.apple.com/swift/)
 
 <img src="https://github.com/hryk224/Bottomsheet/wiki/images/sample1.gif" width="320" > <img src="https://github.com/hryk224/Bottomsheet/wiki/images/sample2.gif" width="320" > <img src="https://github.com/hryk224/Bottomsheet/wiki/images/sample3.gif" width="320" > <img src="https://github.com/hryk224/Bottomsheet/wiki/images/sample4.gif" width="320" >
