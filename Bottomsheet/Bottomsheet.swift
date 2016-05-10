@@ -78,7 +78,7 @@ public class Bottomsheet {
             containerView.addConstraints([toolbarTopConstraint, toolbarRightConstraint, toolbarLeftConstraint])
             toolbar.addGestureRecognizer(panGestureRecognizer)
             panGestureRecognizer.delegate = self
-            panGestureRecognizer.addTarget(self, action: "handleGestureDragging:")
+            panGestureRecognizer.addTarget(self, action: #selector(Bottomsheet.Controller.handleGestureDragging(_:)))
             configurationHandler?(toolbar)
             self.toolbar = toolbar
         }
@@ -101,7 +101,7 @@ public class Bottomsheet {
             containerView.addConstraints([navigationbarTopConstraint, navigationbarRightConstraint, navigationbarLeftConstraint])
             navigationBar.addGestureRecognizer(panGestureRecognizer)
             panGestureRecognizer.delegate = self
-            panGestureRecognizer.addTarget(self, action: "handleGestureDragging:")
+            panGestureRecognizer.addTarget(self, action: #selector(Bottomsheet.Controller.handleGestureDragging(_:)))
             configurationHandler?(navigationBar)
             self.navigationBar = navigationBar
         }
@@ -119,7 +119,7 @@ public class Bottomsheet {
             containerView.addConstraints([mainViewTopConstraint, mainViewLeftConstraint, mainViewRightConstraint, mainViewBottomConstraint])
             contentView.addGestureRecognizer(panGestureRecognizer)
             panGestureRecognizer.delegate = self
-            panGestureRecognizer.addTarget(self, action: "handleGestureDragging:")
+            panGestureRecognizer.addTarget(self, action: #selector(Bottomsheet.Controller.handleGestureDragging(_:)))
             self.contentView = contentView
         }
         // Adds UIScrollView
@@ -191,13 +191,13 @@ public class Bottomsheet {
         }
         public override func viewWillDisappear(animated: Bool) {
             super.viewWillDisappear(animated)
-            overlayViewPanGestureRecognizer.removeTarget(self, action: "handleGestureDragging:")
-            overlayViewTapGestureRecognizer.removeTarget(self, action: "handleTap:")
+            overlayViewPanGestureRecognizer.removeTarget(self, action: #selector(Bottomsheet.Controller.handleGestureDragging(_:)))
+            overlayViewTapGestureRecognizer.removeTarget(self, action: #selector(Bottomsheet.Controller.handleTap(_:)))
         }
         public func present(sender: AnyObject? = nil) {
             containerViewHeightConstraint.constant = maxHeight
-            overlayViewPanGestureRecognizer.removeTarget(self, action: "handleGestureDragging:")
-            panGestureRecognizer.removeTarget(self, action: "handleGestureDragging:")
+            overlayViewPanGestureRecognizer.removeTarget(self, action: #selector(Bottomsheet.Controller.handleGestureDragging(_:)))
+            panGestureRecognizer.removeTarget(self, action: #selector(Bottomsheet.Controller.handleGestureDragging(_:)))
             UIView.animateWithDuration(0.3) {
                 self.view.layoutIfNeeded()
             }
@@ -269,11 +269,11 @@ private extension Bottomsheet.Controller {
         }
         switch viewActionType {
         case .Swipe:
-            overlayViewPanGestureRecognizer.addTarget(self, action: "handleGestureDragging:")
+            overlayViewPanGestureRecognizer.addTarget(self, action: #selector(Bottomsheet.Controller.handleGestureDragging(_:)))
             overlayViewPanGestureRecognizer.delegate = self
             overlayView.addGestureRecognizer(overlayViewPanGestureRecognizer)
         default:
-            overlayViewTapGestureRecognizer.addTarget(self, action: "handleTap:")
+            overlayViewTapGestureRecognizer.addTarget(self, action: #selector(Bottomsheet.Controller.handleTap(_:)))
             overlayView.addGestureRecognizer(overlayViewTapGestureRecognizer)
         }
         scrollView?.setContentOffset(CGPoint(x: 0, y: -(scrollView?.scrollIndicatorInsets.top ?? 0)), animated: false)
