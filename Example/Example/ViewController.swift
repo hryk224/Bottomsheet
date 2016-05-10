@@ -32,7 +32,7 @@ extension ViewController: UITableViewDelegate, UITableViewDataSource {
         cell.textLabel?.text = items[indexPath.row]
         cell.textLabel?.font = UIFont.systemFontOfSize(14)
         return cell
-    }    
+    }
     func tableView(tableView: UITableView, didSelectRowAtIndexPath indexPath: NSIndexPath) {
         let controller = Bottomsheet.Controller()
         if indexPath.row == 0 {
@@ -43,7 +43,7 @@ extension ViewController: UITableViewDelegate, UITableViewDataSource {
             button.center = contentView.center
             button.backgroundColor = UIColor.redColor()
             button.setTitle("dismiss", forState: .Normal)
-            button.addTarget(controller, action: "dismiss:", forControlEvents: .TouchUpInside)
+            button.addTarget(controller, action: #selector(Bottomsheet.Controller.dismiss(_:)), forControlEvents: .TouchUpInside)
             contentView.addSubview(button)
             button.translatesAutoresizingMaskIntoConstraints = false
             contentView.addConstraints([NSLayoutConstraint(item: button,
@@ -77,12 +77,12 @@ extension ViewController: UITableViewDelegate, UITableViewDataSource {
             controller.addContentsView(contentView)
         } else if indexPath.row == 1 {
             controller.addToolbar({ toolbar in
-                let button01 = UIBarButtonItem(title: "present", style:.Plain, target: controller, action: "present:")
+                let button01 = UIBarButtonItem(title: "present", style:.Plain, target: controller, action: #selector(Bottomsheet.Controller.present(_:)))
                 let spacer = UIBarButtonItem(barButtonSystemItem: .FlexibleSpace, target: nil, action: nil)
-                let button02 = UIBarButtonItem(title: "dismiss", style:.Plain, target: controller, action: "dismiss:")
+                let button02 = UIBarButtonItem(title: "dismiss", style:.Plain, target: controller, action: #selector(Bottomsheet.Controller.dismiss(_:)))
                 toolbar.items = [button01, spacer, button02]
             })
-            controller.addCollectionView(configurationHandler: { [weak self] collectionView in
+            controller.addCollectionView { [weak self] collectionView in
                 collectionView.delegate = self?.delegateManager
                 collectionView.dataSource = self?.delegateManager
                 collectionView.registerClass(UICollectionViewCell.self, forCellWithReuseIdentifier: "Cell")
@@ -94,18 +94,18 @@ extension ViewController: UITableViewDelegate, UITableViewDataSource {
                 layout?.minimumLineSpacing = 10
                 layout?.minimumInteritemSpacing = 10
                 layout?.sectionInset = UIEdgeInsetsMake(10, 10, 10, 10)
-            })
+            }
             controller.overlayBackgroundColor = UIColor(red: 0, green: 0, blue: 0, alpha: 0.6)
         } else if indexPath.row == 2 {
-            controller.addNavigationbar(configurationHandler: { navigationBar in
+            controller.addNavigationbar { navigationBar in
                 let item = UINavigationItem(title: "title")
-                let rightButton = UIBarButtonItem(title: "dismiss", style: .Plain, target: controller, action: "dismiss:")
+                let rightButton = UIBarButtonItem(title: "dismiss", style: .Plain, target: controller, action: #selector(Bottomsheet.Controller.dismiss(_:)))
                 item.rightBarButtonItem = rightButton
-                let leftButton = UIBarButtonItem(title: "present", style: .Plain, target: controller, action: "present:")
+                let leftButton = UIBarButtonItem(title: "present", style: .Plain, target: controller, action: #selector(Bottomsheet.Controller.present(_:)))
                 item.leftBarButtonItem = leftButton
                 navigationBar.items = [item]
-            })
-            controller.addTableView(configurationHandler: { [weak self] tableView in
+            }
+            controller.addTableView { [weak self] tableView in
                 tableView.delegate = self?.delegateManager
                 tableView.dataSource = self?.delegateManager
                 tableView.rowHeight = 100
@@ -113,7 +113,7 @@ extension ViewController: UITableViewDelegate, UITableViewDataSource {
                 tableView.registerClass(UITableViewCell.self, forCellReuseIdentifier: "Cell")
                 tableView.contentInset.top = 64
                 tableView.scrollIndicatorInsets.top = 64
-            })
+            }
             controller.viewActionType = .TappedDismiss
             controller.initializeHeight = 200
         }
@@ -122,9 +122,7 @@ extension ViewController: UITableViewDelegate, UITableViewDataSource {
     }
 }
 
-
 final class DelegateManager: NSObject, UITableViewDelegate, UITableViewDataSource, UICollectionViewDelegate, UICollectionViewDataSource {
-    
     var items = ["1", "2", "3", "4", "5", "6", "7", "8"]
     override init() {
         super.init()
@@ -141,7 +139,6 @@ final class DelegateManager: NSObject, UITableViewDelegate, UITableViewDataSourc
         cell.selectionStyle = .None
         return cell
     }
-    
     func numberOfSectionsInCollectionView(collectionView: UICollectionView) -> Int {
         return 4
     }
@@ -154,14 +151,3 @@ final class DelegateManager: NSObject, UITableViewDelegate, UITableViewDataSourc
         return cell
     }
 }
-
-
-
-
-
-
-
-
-
-
-
