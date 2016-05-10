@@ -34,29 +34,24 @@ import Bottomsheet
 ```Swift
 let controller = Bottomsheet.Controller()
 
-// Adds Toolbar
-controller.addToolbar({ toolbar in
-    // toolbar
-})
-
 // Adds View
 let view = UIView
 controller.addContentsView(view)
 
 // Adds NavigationBar
-controller.addNavigationbar(configurationHandler: { navigationBar in
+controller.addNavigationbar { [weak self] navigationBar in
     // navigationBar
-})
+}
 
 // Adds CollectionView
-controller.addCollectionView(configurationHandler: { [weak self] collectionView in
+controller.addCollectionView { [weak self] collectionView in
     // collectionView
-})
+}
 
 // Adds TableView
-controller.addTableView(configurationHandler: { [weak self] tableView in
+controller.addTableView { [weak self] tableView in
     // tableView
-})
+}
 
 // customize
 controller.overlayBackgroundColor = UIColor(red: 255, green: 0, blue: 0, alpha: 0.3)
