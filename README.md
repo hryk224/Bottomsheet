@@ -3,13 +3,13 @@
 Component which presents a dismissible view from the bottom of the screen
 
 [![CocoaPods Compatible](http://img.shields.io/cocoapods/v/Bottomsheet.svg?style=flat)](http://cocoadocs.org/docsets/Bottomsheet)
-[![Swift 2.0](https://img.shields.io/badge/Swift-2.0-orange.svg?style=flat)](https://developer.apple.com/swift/)
+[![Swift 3.0](https://img.shields.io/badge/Swift-3.0-orange.svg?style=flat)](https://developer.apple.com/swift/)
 
 <img src="https://github.com/hryk224/Bottomsheet/wiki/images/sample1.gif" width="320" > <img src="https://github.com/hryk224/Bottomsheet/wiki/images/sample2.gif" width="320" > <img src="https://github.com/hryk224/Bottomsheet/wiki/images/sample3.gif" width="320" > <img src="https://github.com/hryk224/Bottomsheet/wiki/images/sample4.gif" width="320" >
 
 ## Requirements
-- iOS 8.0+
-- Swift 2.0+
+- iOS 9.0+
+- Swift 3.0+
 - ARC
 
 ## install
@@ -55,7 +55,7 @@ controller.addTableView { [weak self] tableView in
 
 // customize
 controller.overlayBackgroundColor = UIColor(red: 255, green: 0, blue: 0, alpha: 0.3)
-controller.viewActionType = .TappedDismiss
+controller.viewActionType = .tappedDismiss
 controller.initializeHeight = 200
 ```
 
