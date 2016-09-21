@@ -27,89 +27,65 @@ private struct Assets {
 }
 
 class ViewController: UIViewController {
-    private var delegateManager = DelegateManager()
-    private var items = ["Simple", "CollectionView", "CollectionView 2 column", "TableView"]
+    fileprivate var delegateManager = DelegateManager()
+    fileprivate var items = ["Simple", "CollectionView", "CollectionView 2 column", "TableView"]
     @IBOutlet weak var tableView: UITableView! {
         didSet {
             tableView.delegate = self
             tableView.dataSource = self
             tableView.rowHeight = 60
             tableView.estimatedRowHeight = 60
-            tableView.registerClass(UITableViewCell.self, forCellReuseIdentifier: "Cell")
+            tableView.register(UITableViewCell.self, forCellReuseIdentifier: "Cell")
         }
     }
 }
 
 extension ViewController: UITableViewDelegate, UITableViewDataSource {
-    func tableView(tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
+    func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
         return items.count
     }
-    func tableView(tableView: UITableView, cellForRowAtIndexPath indexPath: NSIndexPath) -> UITableViewCell {
-        let cell = tableView.dequeueReusableCellWithIdentifier("Cell")!
+    func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
+        let cell = tableView.dequeueReusableCell(withIdentifier: "Cell")!
         cell.textLabel?.text = items[indexPath.row]
-        cell.textLabel?.font = UIFont.systemFontOfSize(14)
+        cell.textLabel?.font = UIFont.systemFont(ofSize: 14)
         return cell
     }
-    func tableView(tableView: UITableView, didSelectRowAtIndexPath indexPath: NSIndexPath) {
+    func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
         let controller = Bottomsheet.Controller()
         if indexPath.row == 0 {
             let contentView = UIView()
-            view.backgroundColor = UIColor.greenColor()
+            view.backgroundColor = .green
             let button = UIButton()
-            button.frame.size = CGSizeMake(100, 40)
+            button.frame.size = CGSize(width: 100, height: 40)
             button.center = contentView.center
-            button.backgroundColor = UIColor.redColor()
-            button.setTitle("dismiss", forState: .Normal)
-            button.addTarget(controller, action: #selector(Bottomsheet.Controller.dismiss(_:)), forControlEvents: .TouchUpInside)
+            button.backgroundColor = .red
+            button.setTitle("dismiss", for: .normal)
+            button.addTarget(controller, action: #selector(Bottomsheet.Controller.dismiss(_:)), for: .touchUpInside)
             contentView.addSubview(button)
             button.translatesAutoresizingMaskIntoConstraints = false
-            contentView.addConstraints([NSLayoutConstraint(item: button,
-                attribute: .Width,
-                relatedBy: .Equal,
-                toItem: nil,
-                attribute: .Width,
-                multiplier: 1,
-                constant: 100),
-                NSLayoutConstraint(item: button,
-                    attribute: .Height,
-                    relatedBy: .Equal,
-                    toItem: nil,
-                    attribute: .Height,
-                    multiplier: 1,
-                    constant: 40),
-                NSLayoutConstraint(item: button,
-                    attribute: .CenterX,
-                    relatedBy: .Equal,
-                    toItem: contentView,
-                    attribute: .CenterX,
-                    multiplier: 1,
-                    constant: 0),
-                NSLayoutConstraint(item: button,
-                    attribute: .CenterY,
-                    relatedBy: .Equal,
-                    toItem: contentView,
-                    attribute: .CenterY,
-                    multiplier: 1,
-                    constant: 0)])
+            contentView.addConstraints([NSLayoutConstraint(item: button, attribute: .width, relatedBy: .equal, toItem: nil, attribute: .width, multiplier: 1, constant: 100),
+                                        NSLayoutConstraint(item: button, attribute: .height, relatedBy: .equal, toItem: nil, attribute: .height, multiplier: 1, constant: 40),
+                                        NSLayoutConstraint(item: button, attribute: .centerX, relatedBy: .equal, toItem: contentView, attribute: .centerX, multiplier: 1, constant: 0),
+                                        NSLayoutConstraint(item: button, attribute: .centerY, relatedBy: .equal, toItem: contentView, attribute: .centerY, multiplier: 1, constant: 0)])
             controller.addContentsView(contentView)
         } else if indexPath.row == 1 {
             controller.addNavigationbar { navigationBar in
                 let item = UINavigationItem(title: "title")
-                let rightButton = UIBarButtonItem(title: "dismiss", style: .Plain, target: controller, action: #selector(Bottomsheet.Controller.dismiss(_:)))
+                let rightButton = UIBarButtonItem(title: "dismiss", style: .plain, target: controller, action: #selector(Bottomsheet.Controller.dismiss(_:)))
                 item.rightBarButtonItem = rightButton
-                let leftButton = UIBarButtonItem(title: "present", style: .Plain, target: controller, action: #selector(Bottomsheet.Controller.present(_:)))
+                let leftButton = UIBarButtonItem(title: "present", style: .plain, target: controller, action: #selector(Bottomsheet.Controller.present(_:)))
                 item.leftBarButtonItem = leftButton
                 navigationBar.items = [item]
             }
             controller.addCollectionView { [weak self] collectionView in
                 collectionView.delegate = self?.delegateManager
                 collectionView.dataSource = self?.delegateManager
-                collectionView.registerClass(CollectionViewCell.self, forCellWithReuseIdentifier: CollectionViewCell.cellIdentifier)
-                collectionView.backgroundColor = UIColor.whiteColor()
+                collectionView.register(CollectionViewCell.self, forCellWithReuseIdentifier: CollectionViewCell.cellIdentifier)
+                collectionView.backgroundColor = .white
                 collectionView.contentInset.top = 64
                 collectionView.scrollIndicatorInsets.top = 64
                 let layout = collectionView.collectionViewLayout as? UICollectionViewFlowLayout
-                layout?.itemSize = CGSizeMake(UIScreen.mainScreen().bounds.width - 20, UIScreen.mainScreen().bounds.width - 20)
+                layout?.itemSize = CGSize(width: UIScreen.main.bounds.width - 20, height: UIScreen.main.bounds.width - 20)
                 layout?.minimumLineSpacing = 10
                 layout?.minimumInteritemSpacing = 10
                 layout?.sectionInset = UIEdgeInsetsMake(10, 10, 10, 10)
@@ -118,34 +94,34 @@ extension ViewController: UITableViewDelegate, UITableViewDataSource {
         } else if indexPath.row == 2 {
             controller.addNavigationbar { navigationBar in
                 let item = UINavigationItem(title: "title")
-                let rightButton = UIBarButtonItem(title: "dismiss", style: .Plain, target: controller, action: #selector(Bottomsheet.Controller.dismiss(_:)))
+                let rightButton = UIBarButtonItem(title: "dismiss", style: .plain, target: controller, action: #selector(Bottomsheet.Controller.dismiss(_:)))
                 item.rightBarButtonItem = rightButton
-                let leftButton = UIBarButtonItem(title: "present", style: .Plain, target: controller, action: #selector(Bottomsheet.Controller.present(_:)))
+                let leftButton = UIBarButtonItem(title: "present", style: .plain, target: controller, action: #selector(Bottomsheet.Controller.present(_:)))
                 item.leftBarButtonItem = leftButton
                 navigationBar.items = [item]
             }
             controller.addCollectionView { [weak self] collectionView in
                 collectionView.delegate = self?.delegateManager
                 collectionView.dataSource = self?.delegateManager
-                collectionView.registerClass(CollectionViewCell.self, forCellWithReuseIdentifier: CollectionViewCell.cellIdentifier)
-                collectionView.backgroundColor = UIColor.whiteColor()
+                collectionView.register(CollectionViewCell.self, forCellWithReuseIdentifier: CollectionViewCell.cellIdentifier)
+                collectionView.backgroundColor = .white
                 collectionView.contentInset.top = 64
                 collectionView.scrollIndicatorInsets.top = 64
                 let layout = collectionView.collectionViewLayout as? UICollectionViewFlowLayout
-                let width = (UIScreen.mainScreen().bounds.width - 30) / 2
-                layout?.itemSize = CGSizeMake(width, width)
+                let width = (UIScreen.main.bounds.width - 30) / 2
+                layout?.itemSize = CGSize(width: width, height: width)
                 layout?.minimumLineSpacing = 10
                 layout?.minimumInteritemSpacing = 10
                 layout?.sectionInset = UIEdgeInsetsMake(10, 10, 10, 10)
             }
-            controller.viewActionType = .TappedDismiss
+            controller.viewActionType = .tappedDismiss
             controller.overlayBackgroundColor = UIColor(red: 0, green: 0, blue: 0, alpha: 0.6)
         } else if indexPath.row == 3 {
             controller.addNavigationbar { navigationBar in
                 let item = UINavigationItem(title: "title")
-                let rightButton = UIBarButtonItem(title: "dismiss", style: .Plain, target: controller, action: #selector(Bottomsheet.Controller.dismiss(_:)))
+                let rightButton = UIBarButtonItem(title: "dismiss", style: .plain, target: controller, action: #selector(Bottomsheet.Controller.dismiss(_:)))
                 item.rightBarButtonItem = rightButton
-                let leftButton = UIBarButtonItem(title: "present", style: .Plain, target: controller, action: #selector(Bottomsheet.Controller.present(_:)))
+                let leftButton = UIBarButtonItem(title: "present", style: .plain, target: controller, action: #selector(Bottomsheet.Controller.present(_:)))
                 item.leftBarButtonItem = leftButton
                 navigationBar.items = [item]
             }
@@ -154,15 +130,15 @@ extension ViewController: UITableViewDelegate, UITableViewDataSource {
                 tableView.dataSource = self?.delegateManager
                 tableView.rowHeight = 100
                 tableView.estimatedRowHeight = 100
-                tableView.registerClass(TableViewCell.self, forCellReuseIdentifier: TableViewCell.cellIdentifier)
+                tableView.register(TableViewCell.self, forCellReuseIdentifier: TableViewCell.cellIdentifier)
                 tableView.contentInset.top = 64
                 tableView.scrollIndicatorInsets.top = 64
             }
-            controller.viewActionType = .TappedDismiss
+            controller.viewActionType = .tappedDismiss
             controller.initializeHeight = 200
         }
-        presentViewController(controller, animated: true, completion: nil)
-        tableView.deselectRowAtIndexPath(indexPath, animated: false)
+        present(controller, animated: true, completion: nil)
+        tableView.deselectRow(at: indexPath, animated: false)
     }
 }
 
@@ -171,26 +147,26 @@ final class DelegateManager: NSObject, UITableViewDelegate, UITableViewDataSourc
     override init() {
         super.init()
     }
-    func numberOfSectionsInTableView(tableView: UITableView) -> Int {
+    func numberOfSections(in tableView: UITableView) -> Int {
         return 10
     }
-    func tableView(tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
+    func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
         return items.count
     }
-    func tableView(tableView: UITableView, cellForRowAtIndexPath indexPath: NSIndexPath) -> UITableViewCell {
-        let cell = tableView.dequeueReusableCellWithIdentifier(TableViewCell.cellIdentifier) as! TableViewCell
+    func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
+        let cell = tableView.dequeueReusableCell(withIdentifier: TableViewCell.cellIdentifier) as! TableViewCell
         cell.newImageView.image = items[indexPath.row]
         cell.newTitleLabel.text = "\(indexPath.row)"
         return cell
     }
-    func numberOfSectionsInCollectionView(collectionView: UICollectionView) -> Int {
+    func numberOfSections(in collectionView: UICollectionView) -> Int {
         return 4
     }
-    func collectionView(collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
+    func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
         return items.count
     }
-    func collectionView(collectionView: UICollectionView, cellForItemAtIndexPath indexPath: NSIndexPath) -> UICollectionViewCell {
-        let cell = collectionView.dequeueReusableCellWithReuseIdentifier(CollectionViewCell.cellIdentifier, forIndexPath: indexPath) as! CollectionViewCell
+    func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
+        let cell = collectionView.dequeueReusableCell(withReuseIdentifier: CollectionViewCell.cellIdentifier, for: indexPath) as! CollectionViewCell
         cell.imageView.image = items[indexPath.row]
         return cell
     }
@@ -200,8 +176,8 @@ private class CollectionViewCell: UICollectionViewCell {
     static let cellIdentifier = "CollectionViewCell"
     lazy var imageView: UIImageView = {
         let imageView = UIImageView(frame: self.bounds)
-        imageView.autoresizingMask = [.FlexibleTopMargin, .FlexibleRightMargin, .FlexibleBottomMargin, .FlexibleLeftMargin, .FlexibleWidth, .FlexibleHeight]
-        imageView.contentMode = .ScaleAspectFill
+        imageView.autoresizingMask = [.flexibleTopMargin, .flexibleRightMargin, .flexibleBottomMargin, .flexibleLeftMargin, .flexibleWidth, .flexibleHeight]
+        imageView.contentMode = .scaleAspectFill
         imageView.clipsToBounds = true
         return imageView
     }()
@@ -213,7 +189,7 @@ private class CollectionViewCell: UICollectionViewCell {
         super.init(coder: aDecoder)
         configure()
     }
-    private func configure() {
+    fileprivate func configure() {
         contentView.addSubview(imageView)
     }
 }
@@ -222,14 +198,14 @@ private class TableViewCell: UITableViewCell {
     static let cellIdentifier = "TableViewCell"
     lazy var newImageView: UIImageView = {
         let imageView = UIImageView(frame: CGRect(origin: CGPoint.zero, size: CGSize(width: 100, height: 100)))
-        imageView.autoresizingMask = .None
-        imageView.contentMode = .ScaleAspectFill
+        imageView.autoresizingMask = UIViewAutoresizing()
+        imageView.contentMode = .scaleAspectFill
         imageView.clipsToBounds = true
         return imageView
     }()
     lazy var newTitleLabel: UILabel = {
         let titleLabel = UILabel(frame: CGRect(x: 110, y: 0, width: 200, height: 100))
-        titleLabel.autoresizingMask = .None
+        titleLabel.autoresizingMask = UIViewAutoresizing()
         titleLabel.clipsToBounds = true
         return titleLabel
     }()
@@ -241,9 +217,9 @@ private class TableViewCell: UITableViewCell {
         super.init(coder: aDecoder)
         configure()
     }
-    private func configure() {
+    fileprivate func configure() {
         contentView.addSubview(newImageView)
         contentView.addSubview(newTitleLabel)
-        selectionStyle = .None
+        selectionStyle = .none
     }
 }
