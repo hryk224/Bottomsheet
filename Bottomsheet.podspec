@@ -1,6 +1,6 @@
 Pod::Spec.new do |s|
   s.name         = "Bottomsheet"
-  s.version      = "1.2.0"
+  s.version      = "1.3.0"
   s.summary      = "Component which presents a dismissible view from the bottom of the screen."
   s.homepage     = "https://github.com/hryk224/Bottomsheet"
   s.screenshots  = "https://github.com/hryk224/Bottomsheet/wiki/images/sample3.gif"
@@ -8,7 +8,7 @@ Pod::Spec.new do |s|
   s.author             = { "hyyk224" => "hryk224@gmail.com" }
   s.platform     = :ios, "9.0"
   s.source       = { :git => "https://github.com/hryk224/Bottomsheet.git", :tag => "#{s.version}" }
-  s.source_files  = "Bottomsheet/*.{h,swift}"
+  s.source_files  = "Sources/*.{h,swift}"
   s.frameworks = "UIKit"
   s.requires_arc = true
 end
