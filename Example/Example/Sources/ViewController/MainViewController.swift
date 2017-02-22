@@ -58,6 +58,7 @@ extension MainViewController: UITableViewDelegate, UITableViewDataSource {
         cell.textLabel?.font = UIFont.systemFont(ofSize: 14)
         cell.textLabel?.numberOfLines = 0
         cell.textLabel?.textAlignment = .center
+        cell.selectionStyle = .none
         return cell
     }
     func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
@@ -66,7 +67,6 @@ extension MainViewController: UITableViewDelegate, UITableViewDataSource {
         switch row {
         case .view:
             let contentView = UIView()
-            view.backgroundColor = .green
             let button = UIButton()
             button.frame.size = CGSize(width: 100, height: 40)
             button.center = contentView.center
@@ -79,7 +79,8 @@ extension MainViewController: UITableViewDelegate, UITableViewDataSource {
                                         NSLayoutConstraint(item: button, attribute: .height, relatedBy: .equal, toItem: nil, attribute: .height, multiplier: 1, constant: 40),
                                         NSLayoutConstraint(item: button, attribute: .centerX, relatedBy: .equal, toItem: contentView, attribute: .centerX, multiplier: 1, constant: 0),
                                         NSLayoutConstraint(item: button, attribute: .centerY, relatedBy: .equal, toItem: contentView, attribute: .centerY, multiplier: 1, constant: 0)])
-            controller.viewActionType = .swipe
+            controller.viewActionType = .tappedPresent
+            controller.overlayBackgroundColor = UIColor.black.withAlphaComponent(0.6)
             controller.addContentsView(contentView)
         case .collectionView:
             controller.addNavigationbar { navigationBar in
@@ -105,7 +106,8 @@ extension MainViewController: UITableViewDelegate, UITableViewDataSource {
                 layout?.sectionInset = UIEdgeInsetsMake(10, 10, 10, 10)
             }
             controller.viewActionType = .tappedDismiss
-            controller.overlayBackgroundColor = UIColor(red: 0, green: 0, blue: 0, alpha: 0.6)
+            controller.overlayBackgroundColor = UIColor.black.withAlphaComponent(0.6)
+            controller.initializeHeight = UIScreen.main.bounds.height / 2
         case .collectionViewIsScrollDisabledInSheet:
             controller.addNavigationbar { navigationBar in
                 let item = UINavigationItem(title: "title")
@@ -130,7 +132,8 @@ extension MainViewController: UITableViewDelegate, UITableViewDataSource {
                 layout?.sectionInset = UIEdgeInsetsMake(10, 10, 10, 10)
             }
             controller.viewActionType = .swipe
-            controller.overlayBackgroundColor = UIColor(red: 0, green: 0, blue: 0, alpha: 0.6)
+            controller.overlayBackgroundColor = UIColor.black.withAlphaComponent(0.6)
+            controller.initializeHeight = UIScreen.main.bounds.height / 2
         case .tableView:
             controller.addNavigationbar { navigationBar in
                 let item = UINavigationItem(title: "title")
@@ -150,6 +153,7 @@ extension MainViewController: UITableViewDelegate, UITableViewDataSource {
                 tableView.scrollIndicatorInsets.top = 64
             }
             controller.viewActionType = .tappedDismiss
+            controller.overlayBackgroundColor = UIColor.black.withAlphaComponent(0.6)
             controller.initializeHeight = 200
         case .tableViewToolbar:
             controller.addToolbar { toolbar in
@@ -166,10 +170,12 @@ extension MainViewController: UITableViewDelegate, UITableViewDataSource {
                 tableView.contentInset.top = 64
                 tableView.scrollIndicatorInsets.top = 64
             }
-            controller.viewActionType = .tappedDismiss
-            controller.initializeHeight = 200
+            controller.viewActionType = .swipe
+            controller.overlayBackgroundColor = UIColor.red.withAlphaComponent(0.6)
+            controller.initializeHeight = UIScreen.main.bounds.height / 2
         }
-        present(controller, animated: true, completion: nil)
-        tableView.deselectRow(at: indexPath, animated: false)
+        DispatchQueue.main.async {
+            self.present(controller, animated: true, completion: nil)
+        }
     }
 }

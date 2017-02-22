@@ -14,7 +14,9 @@ typealias BottomsheetTransitionAnimator = Bottomsheet.TransitionAnimator
 open class Bottomsheet {
     open class Controller: UIViewController {
         public enum OverlayViewActionType {
-            case swipe, tappedDismiss
+            case swipe
+            case tappedPresent
+            case tappedDismiss
         }
         fileprivate enum State {
             case hide
@@ -133,9 +135,9 @@ open class Bottomsheet {
         }
         
         // Adds UINavigationbar
-        open func addNavigationbar(configurationHandler: ((UINavigationBar) -> Void)? = nil) {
+        open func addNavigationbar(_ configurationHandler: ((UINavigationBar) -> Void)? = nil) {
             guard !hasBar else { fatalError("UIToolbar or UINavigationBar can only have one") }
-            let navigationBar = NavigationBar()
+            let navigationBar = UINavigationBar()
             containerView.addSubview(navigationBar)
             navigationBar.translatesAutoresizingMaskIntoConstraints = false
             let topConstraint = NSLayoutConstraint(item: navigationBar,
@@ -165,7 +167,7 @@ open class Bottomsheet {
                                                       toItem: nil,
                                                       attribute: .height,
                                                       multiplier: 1,
-                                                      constant: navigationBar.height + statusBarHeight)
+                                                      constant: 44 + statusBarHeight)
             containerView.addConstraints([topConstraint, rightConstraint, leftConstraint, heightConstraint])
             configurationHandler?(navigationBar)
             self.bar = navigationBar
@@ -249,7 +251,7 @@ open class Bottomsheet {
         }
         
         // Adds UICollectionView
-        open func addCollectionView(isScrollEnabledInSheet: Bool = true, _ flowLayout: UICollectionViewFlowLayout? = nil, configurationHandler: ((UICollectionView) -> Void)) {
+        open func addCollectionView(isScrollEnabledInSheet: Bool = true, flowLayout: UICollectionViewFlowLayout? = nil, configurationHandler: ((UICollectionView) -> Void)) {
             guard !hasView else { fatalError("ContainerView can only have one \(containerView.subviews)") }
             self.isScrollEnabledInSheet = isScrollEnabledInSheet
             let collectionView: UICollectionView
@@ -356,7 +358,14 @@ open class Bottomsheet {
             state = .hide
         }
         dynamic func handleTap(_ gestureRecognizer: UITapGestureRecognizer) {
-            dismiss()
+            switch viewActionType {
+            case .tappedPresent:
+                present()
+            case .tappedDismiss:
+                dismiss()
+            default:
+                break
+            }
         }
         dynamic func handleGestureDragging(_ gestureRecognizer: UIPanGestureRecognizer) {
             let gestureView = gestureRecognizer.view
@@ -505,7 +514,7 @@ private extension BottomsheetController {
         switch viewActionType {
         case .swipe:
             overlayView.addGestureRecognizer(overlayViewPanGestureRecognizer)
-        case .tappedDismiss:
+        case .tappedPresent, .tappedDismiss:
             overlayView.addGestureRecognizer(overlayViewTapGestureRecognizer)
         }
         switch state {
@@ -560,29 +569,6 @@ extension BottomsheetController: UIViewControllerTransitioningDelegate {
     }
     public func animationController(forDismissed dismissed: UIViewController) -> UIViewControllerAnimatedTransitioning? {
         return BottomsheetTransitionAnimator(present: false)
-    }
-}
-
-// MARK: - NavigationBar
-extension Bottomsheet {
-    class NavigationBar: UINavigationBar {
-        fileprivate let height: CGFloat = {
-            let navi = UINavigationBar()
-            navi.sizeToFit()
-            return navi.frame.height
-        }()
-        private var statusBarHeight: CGFloat {
-            return UIApplication.shared.statusBarFrame.height
-        }
-        open override func sizeThatFits(_ size: CGSize) -> CGSize {
-            var barSize = super.sizeThatFits(size)
-            barSize.height += statusBarHeight
-            return barSize
-        }
-        open override func layoutSubviews() {
-            super.layoutSubviews()
-            frame.size.height = height + statusBarHeight
-        }
     }
 }
 
