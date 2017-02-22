@@ -8,64 +8,60 @@
 
 import UIKit
 
+public typealias BottomsheetController = Bottomsheet.Controller
+typealias BottomsheetTransitionAnimator = Bottomsheet.TransitionAnimator
+
 open class Bottomsheet {
     open class Controller: UIViewController {
         public enum OverlayViewActionType {
             case swipe, tappedDismiss
         }
-        // public
-        open var initializeHeight: CGFloat = 300 {
-            didSet {
-                containerViewHeightConstraint?.constant = initializeHeight
-            }
-        }
-        open var maxHeight: CGFloat = UIScreen.main.bounds.height
-        open var viewActionType: Bottomsheet.Controller.OverlayViewActionType = .tappedDismiss
-        open var moveRange: (down: CGFloat, up: CGFloat) = (150, 100)
-        open var duration: (hide: TimeInterval, show: TimeInterval, showAll: TimeInterval) = (0.3, 0.3, 0.3)
-        // OverlayView
-        open let overlayView = UIView()
-        open var overlayBackgroundColor: UIColor? {
-            set { overlayView.backgroundColor = newValue }
-            get { return overlayView.backgroundColor }
-        }
-        // ContainerView
-        open let containerView = UIView()
-        open var containerViewBackgroundColor = UIColor(white: 1, alpha: 1)
-        // private
-        fileprivate var containerViewHeightConstraint: NSLayoutConstraint?
         fileprivate enum State {
             case hide
             case show
             case showAll
         }
-        fileprivate var state: State = .hide {
+        // MARK: - Open property
+        open var initializeHeight: CGFloat = 300 {
             didSet {
-                newState(state)
+                containerViewHeightConstraint?.constant = initializeHeight
             }
         }
-        fileprivate var isNeedLayout = true
-        fileprivate var bar: UIView?
-        // gesture
-        fileprivate var overlayViewPanGestureRecognizer: UIPanGestureRecognizer = {
+        open var viewActionType: BottomsheetController.OverlayViewActionType = .tappedDismiss
+        open var duration: (hide: TimeInterval, show: TimeInterval, showAll: TimeInterval) = (0.3, 0.3, 0.3)
+        open var overlayBackgroundColor: UIColor? {
+            set { overlayView.backgroundColor = newValue }
+            get { return overlayView.backgroundColor }
+        }
+        open var containerViewBackgroundColor = UIColor(white: 1, alpha: 1)
+        open let overlayView = UIView()
+        open let containerView = UIView()
+        // MARK: - Private property
+        fileprivate let overlayViewPanGestureRecognizer: UIPanGestureRecognizer = {
             let gestureRecognizer = UIPanGestureRecognizer()
             return gestureRecognizer
         }()
-        fileprivate var overlayViewTapGestureRecognizer: UITapGestureRecognizer = {
+        fileprivate let overlayViewTapGestureRecognizer: UITapGestureRecognizer = {
             let gestureRecognizer = UITapGestureRecognizer()
             return gestureRecognizer
         }()
-        fileprivate var panGestureRecognizer: UIPanGestureRecognizer = {
+        fileprivate let panGestureRecognizer: UIPanGestureRecognizer = {
             let gestureRecognizer = UIPanGestureRecognizer()
             return gestureRecognizer
         }()
-        fileprivate var barGestureRecognizer: UIPanGestureRecognizer = {
+        fileprivate let barGestureRecognizer: UIPanGestureRecognizer = {
             let gestureRecognizer = UIPanGestureRecognizer()
             return gestureRecognizer
         }()
-        //
+        fileprivate var containerViewHeightConstraint: NSLayoutConstraint?
+        fileprivate var state: State = .hide {
+            didSet { newState(state) }
+        }
+        fileprivate var isNeedLayout = true
+        fileprivate var bar: UIView?
         fileprivate var contentView: UIView?
         fileprivate var scrollView: UIScrollView?
+        fileprivate var isScrollEnabledInSheet: Bool = true
         fileprivate var hasBar: Bool {
             if let _ = bar {
                 return true
@@ -80,103 +76,266 @@ open class Bottomsheet {
             }
             return false
         }
-        fileprivate var isDismissing = false
+        fileprivate var maxHeight: CGFloat {
+            return view.frame.height
+        }
+        fileprivate var moveRange: (down: CGFloat, up: CGFloat) {
+            return (initializeHeight / 3, initializeHeight / 3)
+        }
+        private var statusBarHeight: CGFloat {
+            return UIApplication.shared.statusBarFrame.height
+        }
+        // MARK: - Initialize
         public convenience init() {
             self.init(nibName: nil, bundle: nil)
             configure()
             configureConstraints()
         }
+        
+        // MARK: - Open method
         // Adds UIToolbar
         open func addToolbar(_ configurationHandler: ((UIToolbar) -> Void)? = nil) {
             guard !hasBar else { fatalError("UIToolbar or UINavigationBar can only have one") }
             let toolbar = UIToolbar()
             containerView.addSubview(toolbar)
             toolbar.translatesAutoresizingMaskIntoConstraints = false
-            let toolbarTopConstraint = NSLayoutConstraint(item: toolbar, attribute: .top, relatedBy: .equal, toItem: containerView, attribute: .top, multiplier: 1, constant: 0)
-            let toolbarRightConstraint = NSLayoutConstraint(item: toolbar, attribute: .right, relatedBy: .equal, toItem: containerView, attribute: .right, multiplier: 1, constant: 0)
-            let toolbarLeftConstraint = NSLayoutConstraint(item: toolbar, attribute: .left, relatedBy: .equal, toItem: containerView, attribute: .left, multiplier: 1, constant: 0)
-            containerView.addConstraints([toolbarTopConstraint, toolbarRightConstraint, toolbarLeftConstraint])
+            let topConstraint = NSLayoutConstraint(item: toolbar,
+                                                   attribute: .top,
+                                                   relatedBy: .equal,
+                                                   toItem: containerView,
+                                                   attribute: .top,
+                                                   multiplier: 1,
+                                                   constant: 0)
+            let rightConstraint = NSLayoutConstraint(item: toolbar,
+                                                     attribute: .right,
+                                                     relatedBy: .equal,
+                                                     toItem: containerView,
+                                                     attribute: .right,
+                                                     multiplier: 1,
+                                                     constant: 0)
+            let leftConstraint = NSLayoutConstraint(item: toolbar,
+                                                    attribute: .left,
+                                                    relatedBy: .equal,
+                                                    toItem: containerView,
+                                                    attribute: .left,
+                                                    multiplier: 1,
+                                                    constant: 0)
+            let heightConstraint = NSLayoutConstraint(item: toolbar,
+                                                      attribute: .height,
+                                                      relatedBy: .equal,
+                                                      toItem: nil,
+                                                      attribute: .height,
+                                                      multiplier: 1,
+                                                      constant: 44 + statusBarHeight)
+            containerView.addConstraints([topConstraint, rightConstraint, leftConstraint, heightConstraint])
             configurationHandler?(toolbar)
             self.bar = toolbar
         }
+        
         // Adds UINavigationbar
         open func addNavigationbar(configurationHandler: ((UINavigationBar) -> Void)? = nil) {
             guard !hasBar else { fatalError("UIToolbar or UINavigationBar can only have one") }
-            let naviBar = UINavigationBar()
-            naviBar.sizeToFit()
             let navigationBar = NavigationBar()
-            navigationBar.height = naviBar.frame.height
             containerView.addSubview(navigationBar)
             navigationBar.translatesAutoresizingMaskIntoConstraints = false
-            let navigationbarTopConstraint = NSLayoutConstraint(item: navigationBar, attribute: .top, relatedBy: .equal, toItem: containerView, attribute: .top, multiplier: 1, constant: 0)
-            let navigationbarRightConstraint = NSLayoutConstraint(item: navigationBar, attribute: .right, relatedBy: .equal, toItem: containerView, attribute: .right, multiplier: 1, constant: 0)
-            let navigationbarLeftConstraint = NSLayoutConstraint(item: navigationBar, attribute: .left, relatedBy: .equal, toItem: containerView, attribute: .left, multiplier: 1, constant: 0)
-            containerView.addConstraints([navigationbarTopConstraint, navigationbarRightConstraint, navigationbarLeftConstraint])
+            let topConstraint = NSLayoutConstraint(item: navigationBar,
+                                                   attribute: .top,
+                                                   relatedBy: .equal,
+                                                   toItem: containerView,
+                                                   attribute: .top,
+                                                   multiplier: 1,
+                                                   constant: 0)
+            let rightConstraint = NSLayoutConstraint(item: navigationBar,
+                                                     attribute: .right,
+                                                     relatedBy: .equal,
+                                                     toItem: containerView,
+                                                     attribute: .right,
+                                                     multiplier: 1,
+                                                     constant: 0)
+            let leftConstraint = NSLayoutConstraint(item: navigationBar,
+                                                    attribute: .left,
+                                                    relatedBy: .equal,
+                                                    toItem: containerView,
+                                                    attribute: .left,
+                                                    multiplier: 1,
+                                                    constant: 0)
+            let heightConstraint = NSLayoutConstraint(item: navigationBar,
+                                                      attribute: .height,
+                                                      relatedBy: .equal,
+                                                      toItem: nil,
+                                                      attribute: .height,
+                                                      multiplier: 1,
+                                                      constant: navigationBar.height + statusBarHeight)
+            containerView.addConstraints([topConstraint, rightConstraint, leftConstraint, heightConstraint])
             configurationHandler?(navigationBar)
             self.bar = navigationBar
         }
+        
         // Adds ContentsView
         open func addContentsView(_ contentView: UIView) {
             guard !hasView else { fatalError("ContainerView can only have one") }
             containerView.addSubview(contentView)
             contentView.translatesAutoresizingMaskIntoConstraints = false
-            let mainViewTopConstraint = NSLayoutConstraint(item: contentView, attribute: .top, relatedBy: .equal, toItem: containerView, attribute: .top, multiplier: 1, constant: 0)
-            let mainViewRightConstraint = NSLayoutConstraint(item: contentView, attribute: .right, relatedBy: .equal, toItem: containerView, attribute: .right, multiplier: 1, constant: 0)
-            let mainViewLeftConstraint = NSLayoutConstraint(item: contentView, attribute: .left, relatedBy: .equal, toItem: containerView, attribute: .left, multiplier: 1, constant: 0)
-            let mainViewBottomConstraint = NSLayoutConstraint(item: contentView, attribute: .bottom, relatedBy: .equal, toItem: containerView, attribute: .bottom, multiplier: 1, constant: 0)
-            containerView.addConstraints([mainViewTopConstraint, mainViewLeftConstraint, mainViewRightConstraint, mainViewBottomConstraint])
+            let topConstraint = NSLayoutConstraint(item: contentView,
+                                                   attribute: .top,
+                                                   relatedBy: .equal,
+                                                   toItem: containerView,
+                                                   attribute: .top,
+                                                   multiplier: 1,
+                                                   constant: 0)
+            let rightConstraint = NSLayoutConstraint(item: contentView,
+                                                     attribute: .right,
+                                                     relatedBy: .equal,
+                                                     toItem: containerView,
+                                                     attribute: .right,
+                                                     multiplier: 1,
+                                                     constant: 0)
+            let leftConstraint = NSLayoutConstraint(item: contentView,
+                                                    attribute: .left,
+                                                    relatedBy: .equal,
+                                                    toItem: containerView,
+                                                    attribute: .left,
+                                                    multiplier: 1,
+                                                    constant: 0)
+            let bottomConstraint = NSLayoutConstraint(item: contentView,
+                                                      attribute: .bottom,
+                                                      relatedBy: .equal,
+                                                      toItem: containerView,
+                                                      attribute: .bottom,
+                                                      multiplier: 1,
+                                                      constant: 0)
+            containerView.addConstraints([topConstraint, leftConstraint, rightConstraint, bottomConstraint])
             self.contentView = contentView
         }
+        
         // Adds UIScrollView
-        open func addScrollView(configurationHandler: ((UIScrollView) -> Void)) {
+        open func addScrollView(isScrollEnabledInSheet: Bool = true, configurationHandler: ((UIScrollView) -> Void)) {
             guard !hasView else { fatalError("ContainerView can only have one \(containerView.subviews)") }
+            self.isScrollEnabledInSheet = isScrollEnabledInSheet
             let scrollView = UIScrollView()
             containerView.addSubview(scrollView)
             scrollView.translatesAutoresizingMaskIntoConstraints = false
             configurationHandler(scrollView)
-            let mainViewTopConstraint = NSLayoutConstraint(item: scrollView, attribute: .top, relatedBy: .equal, toItem: containerView, attribute: .top, multiplier: 1, constant: 0)
-            let mainViewRightConstraint = NSLayoutConstraint(item: scrollView, attribute: .right, relatedBy: .equal, toItem: containerView, attribute: .right, multiplier: 1, constant: 0)
-            let mainViewLeftConstraint = NSLayoutConstraint(item: scrollView, attribute: .left, relatedBy: .equal, toItem: containerView, attribute: .left, multiplier: 1, constant: 0)
-            let mainViewBottomConstraint = NSLayoutConstraint(item: scrollView, attribute: .bottom, relatedBy: .equal, toItem: containerView, attribute: .bottom, multiplier: 1, constant: 0)
-            containerView.addConstraints([mainViewTopConstraint, mainViewLeftConstraint, mainViewRightConstraint, mainViewBottomConstraint])
+            let topConstraint = NSLayoutConstraint(item: scrollView,
+                                                   attribute: .top,
+                                                   relatedBy: .equal,
+                                                   toItem: containerView,
+                                                   attribute: .top,
+                                                   multiplier: 1,
+                                                   constant: 0)
+            let rightConstraint = NSLayoutConstraint(item: scrollView,
+                                                     attribute: .right,
+                                                     relatedBy: .equal,
+                                                     toItem: containerView,
+                                                     attribute: .right,
+                                                     multiplier: 1,
+                                                     constant: 0)
+            let leftConstraint = NSLayoutConstraint(item: scrollView,
+                                                    attribute: .left,
+                                                    relatedBy: .equal,
+                                                    toItem: containerView,
+                                                    attribute: .left,
+                                                    multiplier: 1,
+                                                    constant: 0)
+            let bottomConstraint = NSLayoutConstraint(item: scrollView,
+                                                      attribute: .bottom,
+                                                      relatedBy: .equal,
+                                                      toItem: containerView,
+                                                      attribute: .bottom,
+                                                      multiplier: 1,
+                                                      constant: 0)
+            containerView.addConstraints([topConstraint, leftConstraint, rightConstraint, bottomConstraint])
             self.scrollView = scrollView
         }
+        
         // Adds UICollectionView
-        open func addCollectionView(_ flowLayout: UICollectionViewFlowLayout? = nil, configurationHandler: ((UICollectionView) -> Void)) {
+        open func addCollectionView(isScrollEnabledInSheet: Bool = true, _ flowLayout: UICollectionViewFlowLayout? = nil, configurationHandler: ((UICollectionView) -> Void)) {
             guard !hasView else { fatalError("ContainerView can only have one \(containerView.subviews)") }
+            self.isScrollEnabledInSheet = isScrollEnabledInSheet
             let collectionView: UICollectionView
             if let flowLayout = flowLayout {
-                collectionView = UICollectionView(frame: CGRect.zero, collectionViewLayout: flowLayout)
+                collectionView = UICollectionView(frame: .zero, collectionViewLayout: flowLayout)
             } else {
                 let flowLayout = UICollectionViewFlowLayout()
-                collectionView = UICollectionView(frame: CGRect.zero, collectionViewLayout: flowLayout)
+                collectionView = UICollectionView(frame: .zero, collectionViewLayout: flowLayout)
             }
             containerView.addSubview(collectionView)
             collectionView.translatesAutoresizingMaskIntoConstraints = false
             configurationHandler(collectionView)
-            let mainViewTopConstraint = NSLayoutConstraint(item: collectionView, attribute: .top, relatedBy: .equal, toItem: containerView, attribute: .top, multiplier: 1, constant: 0)
-            let mainViewRightConstraint = NSLayoutConstraint(item: collectionView, attribute: .right, relatedBy: .equal, toItem: containerView, attribute: .right, multiplier: 1, constant: 0)
-            let mainViewLeftConstraint = NSLayoutConstraint(item: collectionView, attribute: .left, relatedBy: .equal, toItem: containerView, attribute: .left, multiplier: 1, constant: 0)
-            let mainViewBottomConstraint = NSLayoutConstraint(item: collectionView, attribute: .bottom, relatedBy: .equal, toItem: containerView, attribute: .bottom, multiplier: 1, constant: 0)
-            containerView.addConstraints([mainViewTopConstraint, mainViewLeftConstraint, mainViewRightConstraint, mainViewBottomConstraint])
+            let topConstraint = NSLayoutConstraint(item: collectionView,
+                                                   attribute: .top,
+                                                   relatedBy: .equal,
+                                                   toItem: containerView,
+                                                   attribute: .top,
+                                                   multiplier: 1,
+                                                   constant: 0)
+            let rightConstraint = NSLayoutConstraint(item: collectionView,
+                                                     attribute: .right,
+                                                     relatedBy: .equal,
+                                                     toItem: containerView,
+                                                     attribute: .right,
+                                                     multiplier: 1,
+                                                     constant: 0)
+            let leftConstraint = NSLayoutConstraint(item: collectionView,
+                                                    attribute: .left,
+                                                    relatedBy: .equal,
+                                                    toItem: containerView,
+                                                    attribute: .left,
+                                                    multiplier: 1,
+                                                    constant: 0)
+            let bottomConstraint = NSLayoutConstraint(item: collectionView,
+                                                      attribute: .bottom,
+                                                      relatedBy: .equal,
+                                                      toItem: containerView,
+                                                      attribute: .bottom,
+                                                      multiplier: 1,
+                                                      constant: 0)
+            containerView.addConstraints([topConstraint, leftConstraint, rightConstraint, bottomConstraint])
             collectionView.reloadData()
             self.scrollView = collectionView
         }
+        
         // Adds UITableView
-        open func addTableView(configurationHandler: ((UITableView) -> Void)) {
+        open func addTableView(isScrollEnabledInSheet: Bool = true, configurationHandler: ((UITableView) -> Void)) {
             guard !hasView else { fatalError("ContainerView can only have one \(containerView.subviews)") }
-            let tableView = UITableView(frame: CGRect.zero)
+            self.isScrollEnabledInSheet = isScrollEnabledInSheet
+            let tableView = UITableView(frame: .zero)
             tableView.translatesAutoresizingMaskIntoConstraints = false
             containerView.addSubview(tableView)
             configurationHandler(tableView)
-            let mainViewTopConstraint = NSLayoutConstraint(item: tableView, attribute: .top, relatedBy: .equal, toItem: containerView, attribute: .top, multiplier: 1, constant: 0)
-            let mainViewRightConstraint = NSLayoutConstraint(item: tableView, attribute: .right, relatedBy: .equal, toItem: containerView, attribute: .right, multiplier: 1, constant: 0)
-            let mainViewLeftConstraint = NSLayoutConstraint(item: tableView, attribute: .left, relatedBy: .equal, toItem: containerView, attribute: .left, multiplier: 1, constant: 0)
-            let mainViewBottomConstraint = NSLayoutConstraint(item: tableView, attribute: .bottom, relatedBy: .equal, toItem: containerView, attribute: .bottom, multiplier: 1, constant: 0)
-            containerView.addConstraints([mainViewTopConstraint, mainViewLeftConstraint, mainViewRightConstraint, mainViewBottomConstraint])
+            let topConstraint = NSLayoutConstraint(item: tableView,
+                                                   attribute: .top,
+                                                   relatedBy: .equal,
+                                                   toItem: containerView,
+                                                   attribute: .top,
+                                                   multiplier: 1,
+                                                   constant: 0)
+            let rightConstraint = NSLayoutConstraint(item: tableView,
+                                                     attribute: .right,
+                                                     relatedBy: .equal,
+                                                     toItem: containerView,
+                                                     attribute: .right,
+                                                     multiplier: 1,
+                                                     constant: 0)
+            let leftConstraint = NSLayoutConstraint(item: tableView,
+                                                    attribute: .left,
+                                                    relatedBy: .equal,
+                                                    toItem: containerView,
+                                                    attribute: .left,
+                                                    multiplier: 1,
+                                                    constant: 0)
+            let bottomConstraint = NSLayoutConstraint(item: tableView,
+                                                      attribute: .bottom,
+                                                      relatedBy: .equal,
+                                                      toItem: containerView,
+                                                      attribute: .bottom,
+                                                      multiplier: 1,
+                                                      constant: 0)
+            containerView.addConstraints([topConstraint, leftConstraint, rightConstraint, bottomConstraint])
             tableView.reloadData()
             self.scrollView = tableView
         }
+        
         // Life cycle
         open override func viewDidLoad() {
             super.viewDidLoad()
@@ -189,12 +348,12 @@ open class Bottomsheet {
             super.viewDidLayoutSubviews()
             adjustLayout()
         }
+        // Action
         open func present(_ sender: AnyObject? = nil) {
             state = .showAll
         }
         open func dismiss(_ sender: AnyObject? = nil) {
             state = .hide
-            dismiss(animated: true, completion: nil)
         }
         dynamic func handleTap(_ gestureRecognizer: UITapGestureRecognizer) {
             dismiss()
@@ -207,12 +366,13 @@ open class Bottomsheet {
             case .show:
                 switch gestureRecognizer.state {
                 case .began:
-                    break
+                    scrollView?.isScrollEnabled = false
                 case .changed:
-                    containerView.frame.origin.y += point.y
+                    containerView.frame.origin.y = max(0, containerView.frame.origin.y + point.y)
                     containerViewHeightConstraint?.constant = max(initializeHeight, maxHeight - containerView.frame.origin.y)
-                    gestureRecognizer.setTranslation(CGPoint.zero, in: gestureRecognizer.view)
+                    gestureRecognizer.setTranslation(.zero, in: gestureView)
                 case .ended, .cancelled:
+                    scrollView?.isScrollEnabled = true
                     if containerView.frame.origin.y - originY > moveRange.down {
                         dismiss()
                     } else if (containerViewHeightConstraint?.constant ?? 0) - initializeHeight > moveRange.up {
@@ -235,7 +395,7 @@ open class Bottomsheet {
                 case .changed:
                     let currentTransformY = containerView.transform.ty
                     containerView.transform = CGAffineTransform(translationX: 0, y: currentTransformY + point.y)
-                    gestureRecognizer.setTranslation(CGPoint.zero, in: gestureView)
+                    gestureRecognizer.setTranslation(.zero, in: gestureView)
                 case .ended, .cancelled:
                     scrollView?.isScrollEnabled = true
                     if containerView.transform.ty > moveRange.down {
@@ -257,11 +417,12 @@ open class Bottomsheet {
 }
 
 // MARK: - private
-private extension Bottomsheet.Controller {
+private extension BottomsheetController {
     func configure() {
-        modalPresentationStyle = .overCurrentContext
-        transitioningDelegate = self
         view.frame.size = UIScreen.main.bounds.size
+        transitioningDelegate = self
+        modalPresentationStyle = .overCurrentContext
+        modalPresentationCapturesStatusBarAppearance = true
         overlayView.backgroundColor = UIColor(red: 0, green: 0, blue: 0, alpha: 0.3)
         overlayView.frame = UIScreen.main.bounds
         view.addSubview(overlayView)
@@ -270,12 +431,12 @@ private extension Bottomsheet.Controller {
     }
     func configureConstraints() {
         containerView.translatesAutoresizingMaskIntoConstraints = false
-        let containerViewHeightConstraint = NSLayoutConstraint(item: containerView, attribute: .height, relatedBy: .equal, toItem: nil, attribute: .height, multiplier: 1, constant: initializeHeight)
-        let containerViewRightConstraint = NSLayoutConstraint(item: containerView, attribute: .right, relatedBy: .equal, toItem: view, attribute: .right, multiplier: 1, constant: 0)
-        let containerViewLeftConstraint = NSLayoutConstraint(item: containerView, attribute: .left, relatedBy: .equal, toItem: view, attribute: .left, multiplier: 1, constant: 0)
-        let containerViewBottomLayoutConstraint = NSLayoutConstraint(item: containerView, attribute: .bottom, relatedBy: .equal, toItem: view, attribute: .bottom, multiplier: 1, constant: 0)
-        view.addConstraints([containerViewHeightConstraint, containerViewRightConstraint, containerViewLeftConstraint, containerViewBottomLayoutConstraint])
-        self.containerViewHeightConstraint = containerViewHeightConstraint
+        let heightConstraint = NSLayoutConstraint(item: containerView, attribute: .height, relatedBy: .equal, toItem: nil, attribute: .height, multiplier: 1, constant: initializeHeight)
+        let rightConstraint = NSLayoutConstraint(item: containerView, attribute: .right, relatedBy: .equal, toItem: view, attribute: .right, multiplier: 1, constant: 0)
+        let leftConstraint = NSLayoutConstraint(item: containerView, attribute: .left, relatedBy: .equal, toItem: view, attribute: .left, multiplier: 1, constant: 0)
+        let bottomLayoutConstraint = NSLayoutConstraint(item: containerView, attribute: .bottom, relatedBy: .equal, toItem: view, attribute: .bottom, multiplier: 1, constant: 0)
+        view.addConstraints([heightConstraint, rightConstraint, leftConstraint, bottomLayoutConstraint])
+        self.containerViewHeightConstraint = heightConstraint
     }
     func newState(_ state: State) {
         switch state {
@@ -296,18 +457,25 @@ private extension Bottomsheet.Controller {
         switch state {
         case .hide:
             guard let containerViewHeightConstraint = containerViewHeightConstraint else { return }
-            UIView.animate(withDuration: duration.hide, animations: {
+            let animations: (() -> Void) = {
                 self.containerView.transform = CGAffineTransform(translationX: 0, y: containerViewHeightConstraint.constant)
-            }) 
+            }
+            let completion: ((Bool) -> Void) = { [weak self] in
+                guard $0 else { return }
+                self?.dismiss(animated: true, completion: nil)
+            }
+            UIView.animate(withDuration: duration.hide, delay: 0, options: .curveEaseInOut, animations: animations, completion: completion)
         case .show:
-            UIView.animate(withDuration: duration.show, animations: {
+            let animations: (() -> Void) = {
                 self.containerView.transform = CGAffineTransform.identity
-            }) 
+            }
+            UIView.animate(withDuration: duration.show, delay: 0, options: .curveEaseInOut, animations: animations, completion: nil)
         case .showAll:
             containerViewHeightConstraint?.constant = maxHeight
-            UIView.animate(withDuration: duration.showAll, animations: {
+            let animations: (() -> Void) = {
                 self.view.layoutIfNeeded()
-            }) 
+            }
+            UIView.animate(withDuration: duration.showAll, delay: 0, options: .curveEaseInOut, animations: animations, completion: nil)
         }
     }
     func adjustLayout() {
@@ -322,16 +490,35 @@ private extension Bottomsheet.Controller {
     }
     func configureGesture() {
         //
-        overlayViewPanGestureRecognizer.addTarget(self, action: #selector(Bottomsheet.Controller.handleGestureDragging(_:)))
+        overlayViewPanGestureRecognizer.addTarget(self, action: #selector(BottomsheetController.handleGestureDragging(_:)))
         overlayViewPanGestureRecognizer.delegate = self
-        overlayViewTapGestureRecognizer.addTarget(self, action: #selector(Bottomsheet.Controller.handleTap(_:)))
+        overlayViewTapGestureRecognizer.addTarget(self, action: #selector(BottomsheetController.handleTap(_:)))
         //
-        panGestureRecognizer.addTarget(self, action: #selector(Bottomsheet.Controller.handleGestureDragging(_:)))
+        panGestureRecognizer.addTarget(self, action: #selector(BottomsheetController.handleGestureDragging(_:)))
         panGestureRecognizer.delegate = self
         //
-        barGestureRecognizer.addTarget(self, action: #selector(Bottomsheet.Controller.handleGestureDragging(_:)))
+        barGestureRecognizer.addTarget(self, action: #selector(BottomsheetController.handleGestureDragging(_:)))
         barGestureRecognizer.delegate = self
         barGestureRecognizer.require(toFail: panGestureRecognizer)
+    }
+    func addGesture(_ state: State) {
+        switch viewActionType {
+        case .swipe:
+            overlayView.addGestureRecognizer(overlayViewPanGestureRecognizer)
+        case .tappedDismiss:
+            overlayView.addGestureRecognizer(overlayViewTapGestureRecognizer)
+        }
+        switch state {
+        case .hide:
+            break
+        case .show:
+            bar?.addGestureRecognizer(barGestureRecognizer)
+            guard scrollView == nil || !isScrollEnabledInSheet else { return }
+            containerView.addGestureRecognizer(panGestureRecognizer)
+        case .showAll:
+            bar?.addGestureRecognizer(barGestureRecognizer)
+            containerView.addGestureRecognizer(panGestureRecognizer)
+        }
     }
     func removeGesture(_ state: State) {
         switch state {
@@ -348,38 +535,18 @@ private extension Bottomsheet.Controller {
             overlayView.removeGestureRecognizer(overlayViewTapGestureRecognizer)
         }
     }
-    func addGesture(_ state: State) {
-        switch viewActionType {
-        case .swipe:
-            overlayView.addGestureRecognizer(overlayViewPanGestureRecognizer)
-        case .tappedDismiss:
-            overlayView.addGestureRecognizer(overlayViewTapGestureRecognizer)
-        }
-        switch state {
-        case .hide:
-            break
-        case .show:
-            bar?.addGestureRecognizer(barGestureRecognizer)
-            if scrollView == nil {
-                containerView.addGestureRecognizer(panGestureRecognizer)
-            }
-        case .showAll:
-            bar?.addGestureRecognizer(barGestureRecognizer)
-            containerView.addGestureRecognizer(panGestureRecognizer)
-        }
-    }
 }
 
 // MARK: - UIGestureRecognizerDelegate
-extension Bottomsheet.Controller: UIGestureRecognizerDelegate {
+extension BottomsheetController: UIGestureRecognizerDelegate {
     public func gestureRecognizerShouldBegin(_ gestureRecognizer: UIGestureRecognizer) -> Bool {
-        if let scrollView = scrollView, let gestureRecognizer = gestureRecognizer as? UIPanGestureRecognizer , state == .showAll {
-            let gestureView = gestureRecognizer.view
-            let point = gestureRecognizer.translation(in: gestureView)
-            let contentOffset = scrollView.contentOffset.y + scrollView.contentInset.top
-            return contentOffset == 0 && point.y > 0
+        guard let scrollView = scrollView, let gestureRecognizer = gestureRecognizer as? UIPanGestureRecognizer , state == .showAll else {
+            return true
         }
-        return true
+        let gestureView = gestureRecognizer.view
+        let point = gestureRecognizer.translation(in: gestureView)
+        let contentOffset = scrollView.contentOffset.y + scrollView.contentInset.top
+        return contentOffset == 0 && point.y > 0
     }
     public func gestureRecognizer(_ gestureRecognizer: UIGestureRecognizer, shouldRecognizeSimultaneouslyWith otherGestureRecognizer: UIGestureRecognizer) -> Bool {
         return true
@@ -387,51 +554,55 @@ extension Bottomsheet.Controller: UIGestureRecognizerDelegate {
 }
 
 // MARK: - UIViewControllerTransitioningDelegate
-extension Bottomsheet.Controller: UIViewControllerTransitioningDelegate {
+extension BottomsheetController: UIViewControllerTransitioningDelegate {
     public func animationController(forPresented presented: UIViewController, presenting: UIViewController, source: UIViewController) -> UIViewControllerAnimatedTransitioning? {
-        return Bottomsheet.TransitionAnimator(present: true)
+        return BottomsheetTransitionAnimator(present: true)
     }
     public func animationController(forDismissed dismissed: UIViewController) -> UIViewControllerAnimatedTransitioning? {
-        return Bottomsheet.TransitionAnimator(present: false)
+        return BottomsheetTransitionAnimator(present: false)
     }
 }
 
 // MARK: - NavigationBar
 extension Bottomsheet {
-    open class NavigationBar: UINavigationBar {
-        var height: CGFloat = 44
+    class NavigationBar: UINavigationBar {
+        fileprivate let height: CGFloat = {
+            let navi = UINavigationBar()
+            navi.sizeToFit()
+            return navi.frame.height
+        }()
+        private var statusBarHeight: CGFloat {
+            return UIApplication.shared.statusBarFrame.height
+        }
         open override func sizeThatFits(_ size: CGSize) -> CGSize {
             var barSize = super.sizeThatFits(size)
-            barSize.height += UIApplication.shared.statusBarFrame.height
+            barSize.height += statusBarHeight
             return barSize
         }
         open override func layoutSubviews() {
             super.layoutSubviews()
-            frame.size.height = height + UIApplication.shared.statusBarFrame.height
+            frame.size.height = height + statusBarHeight
         }
     }
 }
 
 // MARK: - TransitionAnimator
 extension Bottomsheet {
-    open class TransitionAnimator: NSObject, UIViewControllerAnimatedTransitioning {
-        fileprivate typealias Animator = Bottomsheet.TransitionAnimator
-        fileprivate static let presentAnimationDuration: TimeInterval = 0.3
-        fileprivate static let dismissAnimationDuration: TimeInterval = 0.3
-        fileprivate var presentDuration: TimeInterval?
-        fileprivate var dismissDuration: TimeInterval?
+    class TransitionAnimator: NSObject, UIViewControllerAnimatedTransitioning {
+        fileprivate var presentDuration: TimeInterval = 0.0
+        fileprivate var dismissDuration: TimeInterval = 0.0
         fileprivate var present: Bool?
-        init(present: Bool, presentDuration: TimeInterval? = nil, dismissDuration: TimeInterval? = nil) {
-            super.init()
+        convenience init(present: Bool, presentDuration: TimeInterval = 0.3, dismissDuration: TimeInterval = 0.3) {
+            self.init()
             self.present = present
             self.presentDuration = presentDuration
             self.dismissDuration = dismissDuration
         }
         open func transitionDuration(using transitionContext: UIViewControllerContextTransitioning?) -> TimeInterval {
             if present == true {
-                return presentDuration ?? Animator.presentAnimationDuration
+                return presentDuration
             } else {
-                return dismissDuration ?? Animator.dismissAnimationDuration
+                return dismissDuration
             }
         }
         open func animateTransition(using transitionContext: UIViewControllerContextTransitioning) {
@@ -443,7 +614,7 @@ extension Bottomsheet {
         }
         // private
         fileprivate func presentAnimation(_ transitionContext: UIViewControllerContextTransitioning) {
-            guard let toVC = transitionContext.viewController(forKey: UITransitionContextViewControllerKey.to) as? Bottomsheet.Controller else {
+            guard let toVC = transitionContext.viewController(forKey: UITransitionContextViewControllerKey.to) as? BottomsheetController else {
                 transitionContext.completeTransition(false)
                 return
             }
@@ -454,29 +625,29 @@ extension Bottomsheet {
             let animations = {
                 toVC.overlayView.alpha = 1
             }
-            UIView.animate(withDuration: transitionDuration(using: transitionContext), delay: 0, options: UIViewAnimationOptions(), animations: animations) { finished in
-                if finished {
-                    let cancelled = transitionContext.transitionWasCancelled
-                    if cancelled {
-                        toVC.view.removeFromSuperview()
-                    }
-                    transitionContext.completeTransition(!cancelled)
+            let completion: ((Bool) -> Void) = { finished in
+                guard finished else { return }
+                let cancelled = transitionContext.transitionWasCancelled
+                if cancelled {
+                    toVC.view.removeFromSuperview()
                 }
+                transitionContext.completeTransition(!cancelled)
             }
+            UIView.animate(withDuration: transitionDuration(using: transitionContext), delay: 0, options: .curveEaseInOut, animations: animations, completion: completion)
         }
         fileprivate func dismissAnimation(_ transitionContext: UIViewControllerContextTransitioning) {
-            guard let fromVC = transitionContext.viewController(forKey: UITransitionContextViewControllerKey.from) as? Bottomsheet.Controller else {
+            guard let fromVC = transitionContext.viewController(forKey: UITransitionContextViewControllerKey.from) as? BottomsheetController else {
                 transitionContext.completeTransition(false)
                 return
             }
             let animations = {
                 fromVC.overlayView.alpha = 0
             }
-            UIView.animate(withDuration: transitionDuration(using: transitionContext), delay: 0, options: UIViewAnimationOptions(), animations: animations) { finished in
-                if finished {
-                    transitionContext.completeTransition(!transitionContext.transitionWasCancelled)
-                }
+            let completion: ((Bool) -> Void) = { finished in
+                guard finished else { return }
+                transitionContext.completeTransition(!transitionContext.transitionWasCancelled)
             }
+            UIView.animate(withDuration: transitionDuration(using: transitionContext), delay: 0, options: .curveEaseInOut, animations: animations, completion: completion)
         }
     }
 }

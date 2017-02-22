@@ -1,6 +1,6 @@
 Pod::Spec.new do |s|
   s.name         = "Bottomsheet"
-  s.version      = "1.3.0"
+  s.version      = "1.4.0"
   s.summary      = "Component which presents a dismissible view from the bottom of the screen."
   s.homepage     = "https://github.com/hryk224/Bottomsheet"
   s.screenshots  = "https://github.com/hryk224/Bottomsheet/wiki/images/sample3.gif"
