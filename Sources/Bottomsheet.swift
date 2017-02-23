@@ -87,6 +87,9 @@ open class Bottomsheet {
         private var statusBarHeight: CGFloat {
             return UIApplication.shared.statusBarFrame.height
         }
+        fileprivate lazy var navigationBarHeight: CGFloat = {
+            return UINavigationBar().intrinsicContentSize.height
+        }()
         // MARK: - Initialize
         public convenience init() {
             self.init(nibName: nil, bundle: nil)
@@ -128,7 +131,7 @@ open class Bottomsheet {
                                                       toItem: nil,
                                                       attribute: .height,
                                                       multiplier: 1,
-                                                      constant: 44 + statusBarHeight)
+                                                      constant: navigationBarHeight + statusBarHeight)
             containerView.addConstraints([topConstraint, rightConstraint, leftConstraint, heightConstraint])
             configurationHandler?(toolbar)
             self.bar = toolbar
@@ -167,7 +170,7 @@ open class Bottomsheet {
                                                       toItem: nil,
                                                       attribute: .height,
                                                       multiplier: 1,
-                                                      constant: 44 + statusBarHeight)
+                                                      constant: navigationBarHeight + statusBarHeight)
             containerView.addConstraints([topConstraint, rightConstraint, leftConstraint, heightConstraint])
             configurationHandler?(navigationBar)
             self.bar = navigationBar
