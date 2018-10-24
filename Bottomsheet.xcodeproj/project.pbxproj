@@ -12,7 +12,7 @@
 
 /* Begin PBXFileReference section */
 		9369696E1E5635640007DFED /* Bottomsheet.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Bottomsheet.h; sourceTree = "<group>"; };
-		OBJ_15 /* Bottomsheet.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; path = Bottomsheet.framework; sourceTree = BUILT_PRODUCTS_DIR; };
+		OBJ_15 /* Bottomsheet.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; path = Bottomsheet.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		OBJ_6 /* Package.swift */ = {isa = PBXFileReference; explicitFileType = sourcecode.swift; path = Package.swift; sourceTree = "<group>"; };
 		OBJ_9 /* Bottomsheet.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Bottomsheet.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
@@ -36,14 +36,13 @@
 			name = Products;
 			sourceTree = BUILT_PRODUCTS_DIR;
 		};
-		OBJ_5 /*  */ = {
+		OBJ_5 = {
 			isa = PBXGroup;
 			children = (
 				OBJ_6 /* Package.swift */,
 				OBJ_7 /* Sources */,
 				OBJ_14 /* Products */,
 			);
-			name = "";
 			sourceTree = "<group>";
 		};
 		OBJ_7 /* Sources */ = {
@@ -98,7 +97,7 @@
 			knownRegions = (
 				en,
 			);
-			mainGroup = OBJ_5 /*  */;
+			mainGroup = OBJ_5;
 			productRefGroup = OBJ_14 /* Products */;
 			projectDirPath = "";
 			projectRoot = "";
@@ -136,6 +135,7 @@
 				PRODUCT_BUNDLE_IDENTIFIER = Bottomsheet;
 				PRODUCT_MODULE_NAME = "$(TARGET_NAME:c99extidentifier)";
 				PRODUCT_NAME = "$(TARGET_NAME:c99extidentifier)";
+				SWIFT_VERSION = 4.2;
 				TARGET_NAME = Bottomsheet;
 			};
 			name = Debug;
@@ -156,6 +156,7 @@
 				PRODUCT_BUNDLE_IDENTIFIER = Bottomsheet;
 				PRODUCT_MODULE_NAME = "$(TARGET_NAME:c99extidentifier)";
 				PRODUCT_NAME = "$(TARGET_NAME:c99extidentifier)";
+				SWIFT_VERSION = 4.2;
 				TARGET_NAME = Bottomsheet;
 			};
 			name = Release;
