@@ -103,7 +103,7 @@ extension MainViewController: UITableViewDelegate, UITableViewDataSource {
                 layout?.itemSize = CGSize(width: width, height: width)
                 layout?.minimumLineSpacing = 10
                 layout?.minimumInteritemSpacing = 10
-                layout?.sectionInset = UIEdgeInsetsMake(10, 10, 10, 10)
+                layout?.sectionInset = UIEdgeInsets(top: 10, left: 10, bottom: 10, right: 10)
             }
             controller.viewActionType = .tappedDismiss
             controller.overlayBackgroundColor = UIColor.black.withAlphaComponent(0.6)
@@ -129,7 +129,7 @@ extension MainViewController: UITableViewDelegate, UITableViewDataSource {
                 layout?.itemSize = CGSize(width: width, height: width)
                 layout?.minimumLineSpacing = 10
                 layout?.minimumInteritemSpacing = 10
-                layout?.sectionInset = UIEdgeInsetsMake(10, 10, 10, 10)
+                layout?.sectionInset = UIEdgeInsets(top: 10, left: 10, bottom: 10, right: 10)
             }
             controller.viewActionType = .swipe
             controller.overlayBackgroundColor = UIColor.black.withAlphaComponent(0.6)
